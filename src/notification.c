@@ -26,8 +26,9 @@
 #define WIDTH                   400
 #define DEFAULT_X0              0
 #define DEFAULT_Y0              0
-#define DEFAULT_RADIUS          30
-#define DEFAULT_BORDER          (DEFAULT_RADIUS * 3 / 2)
+#define DEFAULT_RADIUS          0
+#define DEFAULT_BORDER          40
+#define BACKGROUND_ALPHA        0.45
 
 #define IMAGE_SIZE              110
 #define IMAGE_PADDING           (IMAGE_SIZE / 3)
@@ -49,16 +50,8 @@ typedef struct {
     int last_height;
 
     gboolean composited;
-    Settings settings;
+    glong timeout;
 } WindowData;
-
-Settings
-get_default_settings() {
-    Settings settings;
-    settings.alpha = 0.5f;
-    settings.corner_radius = 30;
-    return settings;
-}
 
 static void
 color_reverse(const GdkColor *a, GdkColor *b) {
@@ -207,7 +200,7 @@ fill_background(GtkWidget *widget, WindowData *windata, cairo_t *cr) {
                      1.0f,
                      DEFAULT_X0 + 1,
                      DEFAULT_Y0 + 1,
-                     windata->settings.corner_radius,
+                     DEFAULT_RADIUS,
                      widget->allocation.width - 2,
                      widget->allocation.height - 2);
 
@@ -215,8 +208,11 @@ fill_background(GtkWidget *widget, WindowData *windata, cairo_t *cr) {
     r = (float)color.red / 65535.0;
     g = (float)color.green / 65535.0;
     b = (float)color.blue / 65535.0;
-    cairo_set_source_rgba (cr, r, g, b, windata->settings.alpha);
+    cairo_set_source_rgba (cr, 0.39, 0.39, 0.39, BACKGROUND_ALPHA);
     cairo_fill_preserve (cr);
+
+    /* Should we show urgency somehow?  Probably doesn't
+     * have any meaningful value to the user... */
 
     // border
 //  color = widget->style->text_aa [GTK_STATE_NORMAL];
@@ -269,7 +265,7 @@ update_shape(WindowData *windata) {
                              1.0f,
                              DEFAULT_X0,
                              DEFAULT_Y0,
-                             windata->settings.corner_radius,
+                             DEFAULT_RADIUS,
                              windata->width,
                              windata->height);
             cairo_fill (cr);
@@ -399,7 +395,7 @@ on_window_map (GtkWidget  *widget, GdkEvent   *event, WindowData *windata) {
     return FALSE;
 }
 
-GtkWindow* create_notification(Settings settings) {
+GtkWindow* create_notification() {
     WindowData *windata;
 
     GtkWidget   *win;
@@ -417,7 +413,6 @@ GtkWindow* create_notification(Settings settings) {
     gtk_window_set_resizable(GTK_WINDOW (win), FALSE);
     gtk_widget_set_app_paintable(win, TRUE);
     windata->win = win;
-    windata->settings = settings;
 
     // connect signals
     g_signal_connect (G_OBJECT (win),

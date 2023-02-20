@@ -1,8 +1,8 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
-AC_PREREQ([2.68])
-AC_INIT([volnoti], [0.2], [])
+AC_PREREQ([2.71])
+AC_INIT([volnoti],[0.2],[])
 AC_CONFIG_SRCDIR([src/daemon.c])
 AC_CONFIG_HEADERS([config.h])
 
@@ -31,8 +31,9 @@ AC_TYPE_SIZE_T
 AC_FUNC_MALLOC
 AC_CHECK_FUNCS([strchr strcspn])
 
-AC_OUTPUT([
+AC_CONFIG_FILES([
   Makefile
   src/Makefile
   res/Makefile
 ])
+AC_OUTPUT
