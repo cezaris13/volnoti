@@ -24,8 +24,18 @@
 #include <gdk-pixbuf/gdk-pixbuf.h>
 
 typedef struct {
-    gfloat alpha;
+    gint image_size;
+    gint width;
+    gint border;
     gint corner_radius;
+    gint x0;
+    gint y0;
+    gfloat alpha;
+    gint image_padding;
+    gint body_x_offset;
+    gint max_icon_size;
+    gint max_progressbar_size;
+
 } Settings;
 
 Settings get_default_settings();

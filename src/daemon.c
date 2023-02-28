@@ -20,10 +20,12 @@
 #include <unistd.h>
 #include <glib.h>
 #include <dbus/dbus-glib.h>
+#include <stdbool.h>
 
 #include "common.h"
 #include "gopt.h"
 #include "notification.h"
+#include "configuration_file.h"
 
 #define IMAGE_PATH   PREFIX
 
@@ -197,6 +199,7 @@ int main(int argc, char* argv[]) {
             gopt_option('t', GOPT_ARG, gopt_shorts('t'), gopt_longs("timeout")),
             gopt_option('a', GOPT_ARG, gopt_shorts('a'), gopt_longs("alpha")),
             gopt_option('r', GOPT_ARG, gopt_shorts('r'), gopt_longs("corner-radius")),
+            gopt_option('c', GOPT_ARG, gopt_shorts('c'), gopt_longs("config")),
             gopt_option('v', GOPT_REPEAT, gopt_shorts('v'), gopt_longs("verbose"))));
 
     int help = gopt(options, 'h');
@@ -216,6 +219,25 @@ int main(int argc, char* argv[]) {
     if (gopt(options, 'r')) {
         if (sscanf(gopt_arg_i(options, 'r', 0), "%d", &settings.corner_radius) != 1)
             print_usage(argv[0], TRUE);
+    }
+    dlist *config = NULL;
+    char *config_directory;
+    if (gopt(options, 'c')) {
+        if (gopt_arg_i(options, 'c', 0)){
+            char *path = gopt_arg_i(options, 'c', 0);
+            config = config_load(path);
+
+    		config_get_int_wrap(config, "imageSize", &(settings.image_size), 1, INT_MAX);
+    		config_get_int_wrap(config, "width", &(settings.width), 1, INT_MAX);
+    		config_get_int_wrap(config, "border", &(settings.border), 0, INT_MAX);
+    		config_get_int_wrap(config, "cornerRadius", &(settings.corner_radius), 0, INT_MAX);
+    		config_get_int_wrap(config, "x0", &(settings.x0), INT_MIN, INT_MAX);
+    		config_get_int_wrap(config, "y0", &(settings.y0), INT_MIN, INT_MAX);
+    		config_get_double_wrap(config, "alpha", &(settings.alpha), -1000.00, 1000.00);
+        }
+        else{
+            print_usage(argv[0], TRUE);
+        }
     }
 
     gopt_free(options);

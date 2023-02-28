@@ -23,19 +23,6 @@
 
 #define USE_COMPOSITE
 
-#define WIDTH                   400
-#define DEFAULT_X0              0
-#define DEFAULT_Y0              0
-#define DEFAULT_RADIUS          0
-#define DEFAULT_BORDER          40
-#define BACKGROUND_ALPHA        0.45
-
-#define IMAGE_SIZE              110
-#define IMAGE_PADDING           (IMAGE_SIZE / 3)
-#define BODY_X_OFFSET           (IMAGE_SIZE + 8)
-#define MAX_ICON_SIZE           IMAGE_SIZE
-#define MAX_PROGRESSBAR_SIZE    (IMAGE_SIZE * 18 / 10)
-
 typedef struct {
     GtkWidget *win;
     GtkWidget *main_vbox;
@@ -50,8 +37,26 @@ typedef struct {
     int last_height;
 
     gboolean composited;
+    Settings settings;
     glong timeout;
 } WindowData;
+
+Settings
+get_default_settings() {
+    Settings settings;
+    settings.alpha = 0.5f;
+    settings.corner_radius = 30;
+    settings.image_size = 110;
+    settings.width = 400;
+    settings.border = 0;
+    settings.x0 = 0;
+    settings.y0 = 0;
+    settings.image_padding = settings.image_size / 3;
+    settings.body_x_offset = settings.image_size + 8;
+    settings.max_icon_size = settings.image_size;
+    settings.max_progressbar_size = settings.image_size * 18 /10;
+    return settings;
+}
 
 static void
 color_reverse(const GdkColor *a, GdkColor *b) {
@@ -198,9 +203,9 @@ fill_background(GtkWidget *widget, WindowData *windata, cairo_t *cr) {
 
     draw_round_rect (cr,
                      1.0f,
-                     DEFAULT_X0 + 1,
-                     DEFAULT_Y0 + 1,
-                     DEFAULT_RADIUS,
+                     windata->settings.x0 + 1,
+                     windata->settings.y0 + 1,
+                     windata->settings.corner_radius,
                      widget->allocation.width - 2,
                      widget->allocation.height - 2);
 
@@ -208,8 +213,11 @@ fill_background(GtkWidget *widget, WindowData *windata, cairo_t *cr) {
     r = (float)color.red / 65535.0;
     g = (float)color.green / 65535.0;
     b = (float)color.blue / 65535.0;
-    cairo_set_source_rgba (cr, 0.39, 0.39, 0.39, BACKGROUND_ALPHA);
+    cairo_set_source_rgba (cr, 0.39, 0.39, 0.39, windata->settings.alpha);
     cairo_fill_preserve (cr);
+
+    /* Should we show urgency somehow?  Probably doesn't
+     * have any meaningful value to the user... */
 
     /* Should we show urgency somehow?  Probably doesn't
      * have any meaningful value to the user... */
@@ -219,7 +227,7 @@ fill_background(GtkWidget *widget, WindowData *windata, cairo_t *cr) {
 //  r = (float) color.red / 65535.0;
 //  g = (float) color.green / 65535.0;
 //  b = (float) color.blue / 65535.0;
-//  cairo_set_source_rgba (cr, r, g, b, BACKGROUND_ALPHA / 2);
+//  cairo_set_source_rgba (cr, r, g, b,  / 2);
 //  cairo_set_line_width (cr, 1);
 //  cairo_stroke (cr);
 }
@@ -263,9 +271,9 @@ update_shape(WindowData *windata) {
             cairo_set_source_rgb (cr, 1.0f, 1.0f, 1.0f);
             draw_round_rect (cr,
                              1.0f,
-                             DEFAULT_X0,
-                             DEFAULT_Y0,
-                             DEFAULT_RADIUS,
+                             windata->settings.x0,
+                             windata->settings.y0,
+                             windata->settings.corner_radius,
                              windata->width,
                              windata->height);
             cairo_fill (cr);
@@ -395,7 +403,7 @@ on_window_map (GtkWidget  *widget, GdkEvent   *event, WindowData *windata) {
     return FALSE;
 }
 
-GtkWindow* create_notification() {
+GtkWindow* create_notification(Settings settings) {
     WindowData *windata;
 
     GtkWidget   *win;
@@ -413,6 +421,8 @@ GtkWindow* create_notification() {
     gtk_window_set_resizable(GTK_WINDOW (win), FALSE);
     gtk_widget_set_app_paintable(win, TRUE);
     windata->win = win;
+    windata->settings = settings;
+
 
     // connect signals
     g_signal_connect (G_OBJECT (win),
@@ -471,7 +481,7 @@ GtkWindow* create_notification() {
                      windata);
     gtk_widget_show(windata->main_vbox);
     gtk_container_add(GTK_CONTAINER(win), windata->main_vbox);
-    gtk_container_set_border_width(GTK_CONTAINER(windata->main_vbox), DEFAULT_BORDER);
+    gtk_container_set_border_width(GTK_CONTAINER(windata->main_vbox), windata->settings.border);
 
 //    windata->main_hbox = gtk_hbox_new (FALSE, 0);
 //    gtk_widget_show (windata->main_hbox);
@@ -483,11 +493,11 @@ GtkWindow* create_notification() {
     windata->iconbox = gtk_alignment_new (0.5f, 0, 0, 0);
     gtk_widget_show (windata->iconbox);
     gtk_alignment_set_padding (GTK_ALIGNMENT (windata->iconbox),
-                               0, IMAGE_PADDING, 0, 0);
+                               0, windata->settings.image_padding, 0, 0);
     gtk_box_pack_start (GTK_BOX (windata->main_vbox),
                         windata->iconbox,
                         FALSE, FALSE, 0);
-    gtk_widget_set_size_request (windata->iconbox, BODY_X_OFFSET, -1);
+    gtk_widget_set_size_request (windata->iconbox, windata->settings.body_x_offset, -1);
 
     // icon
     windata->icon = gtk_image_new ();
@@ -502,7 +512,7 @@ GtkWindow* create_notification() {
     gtk_box_pack_start (GTK_BOX (windata->main_vbox),
                         windata->progressbarbox,
                         FALSE, FALSE, 0);
-    gtk_widget_set_size_request (windata->progressbarbox, BODY_X_OFFSET, -1);
+    gtk_widget_set_size_request (windata->progressbarbox, windata->settings.body_x_offset, -1);
 
     // progress bar
     windata->progressbar = gtk_image_new ();
@@ -534,8 +544,8 @@ set_notification_icon (GtkWindow *nw, GdkPixbuf *pixbuf) {
         scaled = NULL;
         if (pixbuf != NULL) {
                 scaled = scale_pixbuf (pixbuf,
-                                       MAX_ICON_SIZE,
-                                       MAX_ICON_SIZE,
+                                       windata->settings.max_icon_size,
+                                       windata->settings.max_icon_size,
                                        TRUE);
         }
 
@@ -546,12 +556,12 @@ set_notification_icon (GtkWindow *nw, GdkPixbuf *pixbuf) {
 
                 gtk_widget_show (windata->icon);
                 gtk_widget_set_size_request (windata->iconbox,
-                                             MAX (BODY_X_OFFSET, pixbuf_width), -1);
+                                             MAX (windata->settings.body_x_offset, pixbuf_width), -1);
                 g_object_unref (scaled);
         } else {
                 gtk_widget_hide (windata->icon);
                 gtk_widget_set_size_request (windata->iconbox,
-                                             BODY_X_OFFSET,
+                                             windata->settings.body_x_offset,
                                              -1);
         }
 }
@@ -568,8 +578,8 @@ set_progressbar_image (GtkWindow *nw, GdkPixbuf *pixbuf) {
         scaled = NULL;
         if (pixbuf != NULL) {
                 scaled = scale_pixbuf (pixbuf,
-                                       MAX_PROGRESSBAR_SIZE,
-                                       MAX_PROGRESSBAR_SIZE,
+                                       windata->settings.max_progressbar_size,
+                                       windata->settings.max_progressbar_size,
                                        TRUE);
         }
 
@@ -580,12 +590,12 @@ set_progressbar_image (GtkWindow *nw, GdkPixbuf *pixbuf) {
 
                 gtk_widget_show (windata->icon);
                 gtk_widget_set_size_request (windata->progressbarbox,
-                                             MAX (BODY_X_OFFSET, pixbuf_width), -1);
+                                             MAX (windata->settings.body_x_offset, pixbuf_width), -1);
                 g_object_unref (scaled);
         } else {
                 gtk_widget_hide (windata->icon);
                 gtk_widget_set_size_request (windata->progressbarbox,
-                                             BODY_X_OFFSET,
+                                             windata->settings.body_x_offset,
                                              -1);
         }
 }
