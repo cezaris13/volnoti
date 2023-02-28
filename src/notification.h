@@ -30,7 +30,7 @@ typedef struct {
     gint corner_radius;
     gint x0;
     gint y0;
-    gfloat alpha;
+    double alpha;
     gint image_padding;
     gint body_x_offset;
     gint max_icon_size;

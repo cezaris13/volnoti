@@ -44,14 +44,14 @@ typedef struct {
 Settings
 get_default_settings() {
     Settings settings;
-    settings.alpha = 0.5f;
+    settings.alpha = 0.45;
     settings.corner_radius = 30;
     settings.image_size = 110;
     settings.width = 400;
-    settings.border = 0;
+    settings.border = 40;
     settings.x0 = 0;
     settings.y0 = 0;
-    settings.image_padding = settings.image_size / 3;
+    settings.image_padding = settings.image_size / 3;// fix this later
     settings.body_x_offset = settings.image_size + 8;
     settings.max_icon_size = settings.image_size;
     settings.max_progressbar_size = settings.image_size * 18 /10;
