@@ -510,23 +510,22 @@ GtkWindow* create_notification(Settings settings) {
 void
 move_notification (GtkWindow *win, WindowData *windata, int x, int y) {
     GdkWindow *root;
-    gint rwidth, rheight,depth, width, height;
+    gint rwidth, rheight, depth, width, height;
 
     gtk_window_get_size (win, &width, &height);
     root = gtk_widget_get_root_window (GTK_WIDGET (win));
-    gdk_window_get_geometry (root, NULL, NULL, &rwidth, &rheight,&depth);
+    gdk_window_get_geometry (root, NULL, NULL, &rwidth, &rheight, &depth);
 
     // testing reasons, remove later
     // document x and y to a file 
     FILE *fp;
     fp = fopen("/tmp/notify.txt", "a");
-    fprintf(fp, "x: %d, y: %d\n",(rwidth-width-windata->settings.border)/2+x,(rheight-height-windata->settings.border)/2+y);
     fprintf(fp, "width: %d, height: %d \n",width,height);
     fprintf (fp, "rwidth: %d, rheight: %d \n",rwidth,rheight);
     fclose(fp);
     //remove end
 
-    gtk_window_move (win, (rwidth - width)/2 - windata->settings.border +x, (rheight - height)/2 - windata->settings.border + y);
+    gtk_window_move (win, (rwidth - width)/2 - windata->settings.border + x, (rheight - height)/2 - windata->settings.border + y);
 }
 
 void
