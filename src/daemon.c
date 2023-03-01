@@ -179,6 +179,7 @@ static void print_usage(const char* filename, int failure) {
             " -n\t\t--no-daemon\t\tdo not daemonize\n"
             "\n"
             "Configuration:\n"
+            " -c <path>\t--config <path>\t\tpath to the configutation file\n"
             " -t <int>\t--timeout <int>\t\tnotification timeout in seconds\n"
             " -a <float>\t--alpha <float>\t\ttransparency level (0.0 - 1.0, default %.2f)\n"
             " -r <int>\t--corner-radius <int>\tradius of the round corners in pixels (default %d)\n"
