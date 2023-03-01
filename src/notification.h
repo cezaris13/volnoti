@@ -26,10 +26,13 @@
 typedef struct {
     gint image_size;
     gint width;
+    gint height;
     gint border;
     gint corner_radius;
-    gint x0;
-    gint y0;
+    gint x;
+    gint y;
+    gdouble x0;
+    gdouble y0;
     double alpha;
     gint image_padding;
     gint body_x_offset;
@@ -38,9 +41,27 @@ typedef struct {
 
 } Settings;
 
+typedef struct {
+    GtkWidget *win;
+    GtkWidget *main_vbox;
+    GtkWidget *iconbox;
+    GtkWidget *icon;
+    GtkWidget *progressbarbox;
+    GtkWidget *progressbar;
+
+    int width;
+    int height;
+    int last_width;
+    int last_height;
+
+    gboolean composited;
+    Settings settings;
+    glong timeout;
+} WindowData;
+
 Settings get_default_settings();
 GtkWindow* create_notification(Settings settings);
-void move_notification(GtkWindow *win, int x, int y);
+void move_notification(GtkWindow *win, WindowData *windata, int x, int y);
 void set_notification_icon(GtkWindow *nw, GdkPixbuf *pixbuf);
 void set_progressbar_image (GtkWindow *nw, GdkPixbuf *pixbuf);
 void destroy_notification(GtkWindow *win);

@@ -232,8 +232,10 @@ int main(int argc, char* argv[]) {
     		config_get_int_wrap(config, "width", &(settings.width), 1, INT_MAX);
     		config_get_int_wrap(config, "border", &(settings.border), 0, INT_MAX);
     		config_get_int_wrap(config, "cornerRadius", &(settings.corner_radius), 0, INT_MAX);
-    		config_get_int_wrap(config, "x0", &(settings.x0), INT_MIN, INT_MAX);
-    		config_get_int_wrap(config, "y0", &(settings.y0), INT_MIN, INT_MAX);
+    		config_get_double_wrap(config, "x0", &(settings.x0), -1000.00, 1000.00);
+    		config_get_double_wrap(config, "y0", &(settings.y0), -1000.00, 1000.00);
+    		config_get_int_wrap(config, "x", &(settings.x), INT_MIN, INT_MAX);
+    		config_get_int_wrap(config, "y", &(settings.y), INT_MIN, INT_MAX);
     		config_get_double_wrap(config, "alpha", &(settings.alpha), -1000.00, 1000.00);
         }
         else{

@@ -23,24 +23,6 @@
 
 #define USE_COMPOSITE
 
-typedef struct {
-    GtkWidget *win;
-    GtkWidget *main_vbox;
-    GtkWidget *iconbox;
-    GtkWidget *icon;
-    GtkWidget *progressbarbox;
-    GtkWidget *progressbar;
-
-    int width;
-    int height;
-    int last_width;
-    int last_height;
-
-    gboolean composited;
-    Settings settings;
-    glong timeout;
-} WindowData;
-
 Settings
 get_default_settings() {
     Settings settings;
@@ -48,7 +30,10 @@ get_default_settings() {
     settings.corner_radius = 30;
     settings.image_size = 110;
     settings.width = 400;
+    settings.height = settings.width;
     settings.border = 40;
+    settings.x = 0;
+    settings.y = 0;
     settings.x0 = 0;
     settings.y0 = 0;
     settings.image_padding = settings.image_size / 3;// fix this later
@@ -462,8 +447,7 @@ GtkWindow* create_notification(Settings settings) {
     gtk_window_set_title(GTK_WINDOW (win), "Notification");
     gtk_window_set_type_hint(GTK_WINDOW (win),
                              GDK_WINDOW_TYPE_HINT_NOTIFICATION);
-    gtk_window_set_default_size(GTK_WINDOW(win), 400, 400);
-    gtk_window_set_position(GTK_WINDOW(win), GTK_WIN_POS_CENTER);
+    gtk_window_set_default_size(GTK_WINDOW(win), windata->settings.width, windata->settings.height);
 
     g_object_set_data_full (G_OBJECT (win),
                             "windata", windata,
@@ -519,12 +503,30 @@ GtkWindow* create_notification(Settings settings) {
     gtk_widget_show (windata->progressbar);
     gtk_container_add (GTK_CONTAINER (windata->progressbarbox), windata->progressbar);
 
+    move_notification(GTK_WINDOW(win), windata, windata->settings.x,windata->settings.y);
     return GTK_WINDOW(win);
 }
 
 void
-move_notification (GtkWindow *win, int x, int y) {
-    gtk_window_move(GTK_WINDOW(win), x, y);
+move_notification (GtkWindow *win, WindowData *windata, int x, int y) {
+    GdkWindow *root;
+    gint rwidth, rheight,depth, width, height;
+
+    gtk_window_get_size (win, &width, &height);
+    root = gtk_widget_get_root_window (GTK_WIDGET (win));
+    gdk_window_get_geometry (root, NULL, NULL, &rwidth, &rheight,&depth);
+
+    // testing reasons, remove later
+    // document x and y to a file 
+    FILE *fp;
+    fp = fopen("/tmp/notify.txt", "a");
+    fprintf(fp, "x: %d, y: %d\n",(rwidth-width-windata->settings.border)/2+x,(rheight-height-windata->settings.border)/2+y);
+    fprintf(fp, "width: %d, height: %d \n",width,height);
+    fprintf (fp, "rwidth: %d, rheight: %d \n",rwidth,rheight);
+    fclose(fp);
+    //remove end
+
+    gtk_window_move (win, (rwidth - width)/2 - windata->settings.border +x, (rheight - height)/2 - windata->settings.border + y);
 }
 
 void
