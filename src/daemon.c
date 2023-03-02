@@ -237,6 +237,10 @@ int main(int argc, char* argv[]) {
     		config_get_int_wrap(config, "x", &(settings.x), INT_MIN, INT_MAX);
     		config_get_int_wrap(config, "y", &(settings.y), INT_MIN, INT_MAX);
     		config_get_double_wrap(config, "alpha", &(settings.alpha), -1000.00, 1000.00);
+            settings.image_padding = settings.image_size * 11 / 39;
+            settings.body_x_offset = settings.image_size - 12;
+            settings.max_icon_size = settings.image_size;
+            settings.max_progressbar_size = settings.image_size * 99 /65;
         }
         else{
             print_usage(argv[0], TRUE);
